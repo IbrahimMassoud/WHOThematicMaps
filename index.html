@@ -1,4 +1,3 @@
-
 <html>
 
 <head>
@@ -9,12 +8,18 @@
     </title>
     <link rel="icon" href="Images/WHOLogo.png">
 
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.0.0/dist/css/bootstrap.min.css" integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" crossorigin="anonymous">
-    <script src="https://code.jquery.com/jquery-3.2.1.slim.min.js" integrity="sha384-KJ3o2DKtIkvYIK3UENzmM7KCkRr/rE9/Qpg6aAZGJwFDMVNA/GpGFF93hXpG5KkN" crossorigin="anonymous"></script>
-    <script src="https://cdn.jsdelivr.net/npm/popper.js@1.12.9/dist/umd/popper.min.js" integrity="sha384-ApNbgh9B+Y1QKtv3Rn7W3mgPxhU9K/ScQsAP7hUibX39j7fakFPskvXusvfa0b4Q" crossorigin="anonymous"></script>
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@4.0.0/dist/js/bootstrap.min.js" integrity="sha384-JZR6Spejh4U02d8jOt6vLEHfe/JQGiRRSQQxSfFWpi1MquVdAyjUar5+76PVCmYl" crossorigin="anonymous"></script>
-    <link rel="stylesheet" href="https://js.arcgis.com/4.23/esri/themes/light/main.css" />
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/chroma-js/2.1.0/chroma.min.js"></script>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.0.0/dist/css/bootstrap.min.css"
+          integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" crossorigin="anonymous">
+    <script src="https://code.jquery.com/jquery-3.2.1.slim.min.js"
+            integrity="sha384-KJ3o2DKtIkvYIK3UENzmM7KCkRr/rE9/Qpg6aAZGJwFDMVNA/GpGFF93hXpG5KkN"
+            crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/popper.js@1.12.9/dist/umd/popper.min.js"
+            integrity="sha384-ApNbgh9B+Y1QKtv3Rn7W3mgPxhU9K/ScQsAP7hUibX39j7fakFPskvXusvfa0b4Q"
+            crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@4.0.0/dist/js/bootstrap.min.js"
+            integrity="sha384-JZR6Spejh4U02d8jOt6vLEHfe/JQGiRRSQQxSfFWpi1MquVdAyjUar5+76PVCmYl"
+            crossorigin="anonymous"></script>
+    <link rel="stylesheet" href="https://js.arcgis.com/4.23/esri/themes/dark/main.css" />
     <script src="https://js.arcgis.com/4.23/"></script>
     <script src="main.js" type="text/javascript"></script>
     <link rel="stylesheet" href="style.css">
@@ -25,47 +30,53 @@
 
     <div style=" display: none;" id="viewDiv"></div>
     <div id="histogram"></div>
-    <div style="padding: 8px; display: none;" id="basemapGallery" class="esri-widget"><i class="esri-icon-basemap \ue634"></i></div>
-    <div style="padding: 8px; display: none;" id="legendIcon" class="esri-widget"><i class="esri-icon-legend \ue90c"></i></div>
-    <div style="padding: 8px; display: none;" id="filteringIcon" class="esri-widget"><i class="esri-icon-filter \ue653"></i></div>
+    <div id="basemapGallery" class="esri-widget customWidget">
+        <i class="esri-icon-basemap \ue634"></i>
+    </div>
+    <div id="legendIcon" class="esri-widget customWidget">
+        <i class="esri-icon-legend \ue90c"></i>
+    </div>
+    <div id="filteringIcon" class="esri-widget customWidget">
+        <i class="esri-icon-filter \ue653"></i>
+    </div>
 
-    
-    <div id="filters" class="esri-widget" style="display: none; padding: 15px;">
-        
+
+    <div id="filters" class="esri-widget" style="display: none; padding: 25px;">
+
         <!-- <div style="padding: 8px;" id="filteringIcon" class="esri-widget"><i class="esri-icon-expand \ue631"></i></div> -->
-        <div id="CountriesMenu"  >
-            <label>Country</label>
-            <select name="Countries" id="countriesList">
+        <div id="CountriesMenu" class="row">
+            <label class="column">Country</label>
+            <select class="column" name="Countries" id="countriesList">
             </select>
         </div>
-        <div id="VariablesMenu"  >
-            <label>Variable</label>
-            <select name="variables" id="variablesList">
-              <option value="ConfirmedCases">Reported Cases per 100K Population</option>
-              <option value="CFR">CFR%</option>
-              <!-- <option value="sampleTested">sample tested per 1M population </option>
-              <option value="RecoveryRate">RecoveryRate%</option> -->
+        <div id="VariablesMenu" class="row">
+            <label class="column">Variable</label>
+            <select class="column" name="variables" id="variablesList">
+                <option value="AttackRate">Confirmed Cases per 100K Population</option>
+                <option value="sampleTested">Tests per 100K population </option>
+                <option value="MortalityRate">Death cases per 100,000 population %</option>
+                <option value="RecoveryRate">Recovery Rate %</option>
+                <option value="CFR">CFR %</option>
             </select>
         </div>
-        <div id="PeriodTypeMenu"  >
-            <label for="lang">Period Type</label>
-            <select name="PeriodType" id="PeriodTypeList">
-              <!-- <option value="1">Last 7 Days</option>
-              <option value="2">Last 14 Days</option> -->
-              <option value="0">Total</option>
-              <option value="7">Yearly</option>
-              <option value="3">Weekly</option>
-              <option value="4">Monthly</option>
+        <div id="PeriodTypeMenu" class="row">
+            <label class="column" for="lang">Period Type</label>
+            <select class="column" name="PeriodType" id="PeriodTypeList">
+                <!-- <option value="1">Last 7 Days</option>
+                <option value="2">Last 14 Days</option> -->
+                <option value="0">Total</option>
+                <option value="7">Yearly</option>
+                <option value="3">Weekly</option>
+                <option value="4">Monthly</option>
             </select>
         </div>
-        <div id="PeriodDateMenu" >
-            <label for="lang">Period Date</label>
-            <select name="PeriodDate" id="PeriodDateList">
+        <div id="PeriodDateMenu" class="row">
+            <label class="column" for="lang">Period Date</label>
+            <select class="column" name="PeriodDate" id="PeriodDateList">
             </select>
         </div>
     </div>
-    
-    
+
     <div id="loadingBox" class="boxes">
         <div class="box">
             <div></div>
@@ -93,31 +104,5 @@
         </div>
     </div>
 </body>
+
 </html>
-
-
-<!-- <html>
-<head>
-  <meta charset="utf-8">
-  <meta name="viewport" content="initial-scale=1, maximum-scale=1, user-scalable=no">
-  <title>ArcGIS API for JavaScript Tutorials: Add a feature layer</title>
-  <style>
-    html, body, #viewDiv {
-      padding: 0;
-      margin: 0;
-      height: 100%;
-      width: 100%;
-    }
-</style>
- <script src="https://unpkg.com/@esri/arcgis-rest-request@3.0.0/dist/umd/request.umd.js"></script>
-    <script src="https://unpkg.com/@esri/arcgis-rest-auth@3.0.0/dist/umd/auth.umd.js"></script>
-    <script src="https://unpkg.com/@esri/arcgis-rest-feature-layer@3.0.0/dist/umd/feature-layer.umd.js"></script>
-  <link rel="stylesheet" href="https://js.arcgis.com/4.23/esri/themes/light/main.css">
-  <script src="https://js.arcgis.com/4.23/"></script>
-  <script src="index.js" type="text/javascript"></script>
-
-</head>
-<body>
-  <div id="viewDiv"></div>
-</body>
-</html> -->
