@@ -16,7 +16,7 @@ body {
 }
 
 .column {
-    padding: 0px 10px;
+    padding: 0px 5px;
 }
 
 .row {
@@ -24,16 +24,23 @@ body {
 }
 
 select {
-    width: 200px;
+    width: 180px;
 }
 
 label {
     width: 100px;
+    font-weight: bolder;
 }
 
 .customWidget {
     padding: 8px;
     display: none;
+}
+
+.menuTheme {
+    background-color: #393A3A;
+    color: white;
+    font-weight: 500;
 }
 /* .navbar-collapse ul li {
     padding: 30px;

@@ -36,32 +36,47 @@
     <div id="legendIcon" class="esri-widget customWidget">
         <i class="esri-icon-legend \ue90c"></i>
     </div>
-    <div id="filteringIcon" class="esri-widget customWidget">
-        <i class="esri-icon-filter \ue653"></i>
-    </div>
+
 
 
     <div id="filters" class="esri-widget" style="display: none; padding: 25px;">
 
+        <div id="filteringIcon" class="esri-widget customWidget">
+            <i class="esri-icon-filter \ue653"></i>
+        </div>
         <!-- <div style="padding: 8px;" id="filteringIcon" class="esri-widget"><i class="esri-icon-expand \ue631"></i></div> -->
         <div id="CountriesMenu" class="row">
             <label class="column">Country</label>
-            <select class="column" name="Countries" id="countriesList">
+            <select class="column menuTheme" name="Countries" id="countriesList">
             </select>
         </div>
-        <div id="VariablesMenu" class="row">
-            <label class="column">Variable</label>
-            <select class="column" name="variables" id="variablesList">
-                <option value="AttackRate">Confirmed Cases per 100K Population</option>
+        <div class="row">
+            <label class="column">1st Indicator</label>
+            <select class="column menuTheme" name="variables" id="1stIndicatorsList">
+                <!-- <option value="AttackRate">Confirmed Cases per 100K Population</option> -->
+                <option value="AttackRate">Attack rate</option>
+                <!-- <option value="MortalityRate">Death cases per 100,000 population</option> -->
+                <option value="MortalityRate">Mortality rate</option>
                 <option value="sampleTested">Tests per 100K population </option>
-                <option value="MortalityRate">Death cases per 100,000 population %</option>
+                <option value="RecoveryRate">Recovery Rate %</option>
+                <option value="CFR">CFR %</option>
+            </select>
+        </div>
+        <div class="row">
+            <label class="column">2nd Indicator</label>
+            <select class="column menuTheme" name="variables" id="2ndIndicatorsList">
+                <!-- <option value="MortalityRate">Death cases per 100,000 population</option> -->
+                <option value="MortalityRate">Mortality rate</option>
+                <!-- <option value="AttackRate">Confirmed Cases per 100K Population</option> -->
+                <option value="AttackRate">Attack rate</option>
+                <option value="sampleTested">Tests per 100K population </option>
                 <option value="RecoveryRate">Recovery Rate %</option>
                 <option value="CFR">CFR %</option>
             </select>
         </div>
         <div id="PeriodTypeMenu" class="row">
-            <label class="column" for="lang">Period Type</label>
-            <select class="column" name="PeriodType" id="PeriodTypeList">
+            <label class="column" for="lang">Period type</label>
+            <select class="column menuTheme" name="PeriodType" id="PeriodTypeList">
                 <!-- <option value="1">Last 7 Days</option>
                 <option value="2">Last 14 Days</option> -->
                 <option value="0">Total</option>
@@ -71,8 +86,8 @@
             </select>
         </div>
         <div id="PeriodDateMenu" class="row">
-            <label class="column" for="lang">Period Date</label>
-            <select class="column" name="PeriodDate" id="PeriodDateList">
+            <label class="column" for="lang">Period date</label>
+            <select class="column menuTheme" name="PeriodDate" id="PeriodDateList">
             </select>
         </div>
     </div>

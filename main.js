@@ -11,6 +11,7 @@ require([
     "esri/smartMapping/symbology/color",
     "esri/smartMapping/symbology/support/colorRamps",
     "esri/layers/GraphicsLayer",
+    "esri/smartMapping/statistics/summaryStatistics",
 ], (
     Map,
     MapView,
@@ -23,10 +24,11 @@ require([
     colorRendererCreator,
     colorSymbology,
     colorRamps,
-    Graphic
+    Graphic,
+    SummaryStatistics
 ) => {
-    esriConfig.apiKey =
-        "AAPKe44b10789165473bbb2ed24e27e5a9f9tAJ4hB35ju4KTciHnmADukI2pL1KgoM-PNcxhZJswrhJQOM2ph5rRAXkm-D_-abA";
+    // esriConfig.apiKey =
+    //   "AAPKe44b10789165473bbb2ed24e27e5a9f9tAJ4hB35ju4KTciHnmADukI2pL1KgoM-PNcxhZJswrhJQOM2ph5rRAXkm-D_-abA";
     const nationalUrl =
         "https://services3.arcgis.com/1FS0hEOLnjHnov75/arcgis/rest/services/WHO_EMRO_GD_20220417_ThematicMap/FeatureServer/0";
     const nationalViewUrl =
@@ -37,7 +39,10 @@ require([
     const classificationMethod = "natural-breaks";
     const numClasses = 5;
 
-    const nationalLevel = new FeatureLayer({
+    const backGroundLayer = new FeatureLayer({
+        url: nationalUrl,
+    });
+    const foreGroundLayer = new FeatureLayer({
         url: nationalUrl,
     });
     const nationalLevelView = new FeatureLayer({
@@ -49,13 +54,13 @@ require([
     });
 
     const map = new Map({
-        basemap: "gray-vector",
+        basemap: "dark-gray-vector",
     });
 
     const view = new MapView({
         container: "viewDiv",
         map: map,
-        center: [25, 20],
+        center: [20, 20],
         zoom: 3,
     });
 
@@ -65,9 +70,15 @@ require([
         theme: "above-and-below",
         name: "Esri Green and Blue 4",
     });
+    const defaultSymbol = {
+        type: "simple-marker",
+        outline: {
+            width: 1
+        }
+    };
 
-    function GetColorRampName(variable) {
-        switch (variable) {
+    function GetColorRampName(firstIndicator) {
+        switch (firstIndicator) {
             case "AttackRate":
                 return "Esri Pumpkin Pie";
             case "CFR":
@@ -78,21 +89,35 @@ require([
                 return "Esri Red 1";
             case "RecoveryRate":
                 return "Esri Green 2";
-            case "RecoveryRate":
-                return "Esri Green 2";
         }
     }
-    function generateRenderer(featureLayer, variable) {
-        console.log(featureLayer)
-        featureLayer.title = GetLabel(variable) //"0-Map legend";
-        var colorRampName = GetColorRampName(variable);
+    function GetDotLayerColor(secondIndicator) {
+        switch (secondIndicator) {
+            case "AttackRate":
+                return [251, 182, 100, 0.75];
+            case "CFR":
+                return [194, 61, 51, 0.75];
+            case "sampleTested":
+                return [133, 49, 193, 0.75];
+            case "MortalityRate":
+                return [216, 48, 32, 0.75];
+            case "RecoveryRate":
+                return [97, 198, 111, 0.75];
+        }
+    }
+    function AddLayersToMap(...layers) {
+        layers.forEach(layer => map.add(layer))
+    }
+    function CreatePolygonRenderer(featureLayer, firstIndicator) {
+        featureLayer.title = GetLabel(firstIndicator) //"0-Map legend";
+        var colorRampName = GetColorRampName(firstIndicator);
         defaultScheme.colorsForClassBreaks =
             colorRamps.byName(colorRampName).colorsForClassBreaks;
         const colorScheme = colorSymbology.flipColors(defaultScheme);
         const params = {
             layer: featureLayer,
             view: view,
-            field: variable,
+            field: firstIndicator,
             classificationMethod: classificationMethod,
             numClasses: numClasses,
             colorScheme: colorScheme,
@@ -106,23 +131,18 @@ require([
             .then((rendererResponse) => {
                 featureLayer.renderer = rendererResponse.renderer;
                 featureLayer.renderer.defaultSymbol = null
-                featureLayer.popupTemplate = GetPopUpTemplate(variable);
-                featureLayer.popupTemplate.title = "{Name}";
+                featureLayer.popupTemplate = GetPopUpTemplate(firstIndicator);
 
-                map.add(featureLayer);
-                map.add(disputedBoundaries)
-                // featureLayer.queryFeatures().then((res)=>{console.log(res.features)})
-
-                return rendererResponse.renderer;
+                // return rendererResponse.renderer;
             });
         // .then(function (returnedRendered) {
-        //   const nationalLevelRenderLayer = new FeatureLayer({
+        //   const backGroundLayerRenderer = new FeatureLayer({
         //     url: nationalUrl,
         //     renderer: returnedRendered,
         //     title: "Emro Countries",
-        //     popupTemplate: GetPopUpTemplate(variable),
+        //     popupTemplate: GetPopUpTemplate(firstIndicator),
         //   });
-        //   map.add(nationalLevelRenderLayer);
+        //   map.add(backGroundLayerRenderer);
         // });
     }
     function StartLoading() {
@@ -134,14 +154,14 @@ require([
     }
     function EndLoading() {
         document.getElementById("loadingBox").style.display = "none";
-        document.getElementById("filteringIcon").style.display = "block";
+        document.getElementById("filteringIcon").style.display = "flex";
         document.getElementById("legendIcon").style.display = "block";
         document.getElementById("basemapGallery").style.display = "block";
         document.getElementById("filters").style.display = "block";
         document.getElementById("viewDiv").style.display = "flex";
     }
-    function GetPopUpTemplate(variable) {
-        var label = GetLabel(variable);
+    function GetPopUpTemplate(indicator) {
+        var label = GetLabel(indicator);
         const template = {
             title: "{Name}",
             content: [
@@ -149,7 +169,7 @@ require([
                     type: "fields",
                     fieldInfos: [
                         {
-                            fieldName: variable,
+                            fieldName: indicator,
                             label: label,
                             format: {
                                 digitSeparator: true,
@@ -170,8 +190,8 @@ require([
         };
         return template;
     }
-    function GetLabel(variable) {
-        switch (variable) {
+    function GetLabel(indicator) {
+        switch (indicator) {
             case "AttackRate":
                 return "Confirmed cases per 100,000 population";
             case "CFR":
@@ -180,13 +200,13 @@ require([
                 return "Tests per 1000,000 population";
             case "RecoveryRate":
                 return "Recovery rate %";
-            case "MoltarityRate":
+            case "MortalityRate":
                 return "Death cases per 100,000 population";
         }
     }
     function FillCountriesMenu() {
         var countrySelector = document.getElementById("countriesList");
-        nationalLevel.queryFeatures().then(function (results) {
+        backGroundLayer.queryFeatures().then(function (results) {
             var countries = results.features.map((f) => f.attributes.Name);
             countries.unshift("All");
             countries.forEach((countryName) => {
@@ -221,20 +241,21 @@ require([
         });
     }
 
-    function ChangeVariable() {
+    function ChangePolygonLayerIndicator() {
         StartLoading();
-        var variable = this.value;
+        var firstIndicator = this.value;
         //Check if specific date selected
         let date = document.getElementById("PeriodDateList").value;
         if (date == "Total") {
             map.removeAll();
-            generateRenderer(nationalLevel, variable);
+            CreatePolygonRenderer(backGroundLayer, firstIndicator);
+            AddLayersToMap(disputedBoundaries, backGroundLayer, foreGroundLayer)
             setTimeout(EndLoading, 1000);
         } else {
             ChangeDate();
         }
     }
-    document.getElementById("variablesList").onchange = ChangeVariable;
+    document.getElementById("1stIndicatorsList").onchange = ChangePolygonLayerIndicator;
 
     function ChangeDateType() {
         var periodDataSelector = document.getElementById("PeriodDateList");
@@ -248,10 +269,14 @@ require([
     function ChangeDate() {
         StartLoading();
         var periodDataValue = document.getElementById("PeriodDateList").value;
-        var variable = document.getElementById("variablesList").value;
+        var firstIndicator = document.getElementById("1stIndicatorsList").value;
+        var secondIndicator = document.getElementById("2ndIndicatorsList").value;
+
         if (periodDataValue == "Total") {
             map.removeAll();
-            generateRenderer(nationalLevel, variable);
+            CreatePolygonRenderer(backGroundLayer, firstIndicator);
+            CreateDotRenderer(foreGroundLayer, secondIndicator)
+            AddLayersToMap(disputedBoundaries, backGroundLayer, foreGroundLayer)
             setTimeout(EndLoading, 1000);
         } else {
             dataHolder = [];
@@ -314,7 +339,7 @@ require([
                     geometryType: "polygon",
                 });
 
-                nationalLevel.queryFeatures().then(function (results) {
+                backGroundLayer.queryFeatures().then(function (results) {
                     dataHolder.forEach((record) => {
                         let feature;
                         for (let i = 0; i < results.features.length; i++) {
@@ -347,9 +372,32 @@ require([
                     });
                     promise.then(() => {
                         map.removeAll();
-                        generateRenderer(lyr, variable);
+                        CreatePolygonRenderer(lyr, firstIndicator);
+                        CreateDotRenderer(foreGroundLayer, secondIndicator)
+                        AddLayersToMap(disputedBoundaries, lyr, foreGroundLayer)
                         setTimeout(EndLoading, 1000);
-                    });
+
+                        var newFeature = new FeatureLayer({
+                            source: lyr,
+                            objectIdField: "ObjectID_1",
+                            geometryType: "polygon"
+                        })
+
+                        return newFeature
+                        // newFeature.queryFeatures().then(function(res){
+                        //   res.features.forEach(f=> console.log(f))
+                        // })
+
+                        // console.log(newFeature)
+                        // // CreateDotRenderer(newFeature,secondIndicator)
+                        // AddLayersToMap(disputedBoundaries,lyr,newFeature) 
+                        // setTimeout(EndLoading, 1000);
+                    }).then((returned) => {
+
+                        // CreateDotRenderer(returned,secondIndicator)
+                        // AddLayersToMap(disputedBoundaries,lyr,returned) 
+                        // setTimeout(EndLoading, 1000);
+                    })
                 });
             });
         }
@@ -363,10 +411,12 @@ require([
         }
         if (this.value == "0") {
             //Total
-            var variable = document.getElementById("variablesList").value;
+            var firstIndicator = document.getElementById("1stIndicatorsList").value;
             StartLoading();
             map.removeAll();
-            generateRenderer(nationalLevel, variable);
+            CreatePolygonRenderer(backGroundLayer, firstIndicator);
+            AddLayersToMap(disputedBoundaries, backGroundLayer, foreGroundLayer)
+
             setTimeout(EndLoading, 1000);
         }
         FillDateMenu();
@@ -380,7 +430,7 @@ require([
                 returnGeometry: true,
                 outFields: ["*"],
             };
-            nationalLevel.queryFeatures(query).then(function (results) {
+            backGroundLayer.queryFeatures(query).then(function (results) {
                 let caller = results.features[0];
                 view.goTo(caller.geometry, { duration: 1000 });
             });
@@ -396,21 +446,75 @@ require([
     }
     document.getElementById("countriesList").onchange = ZoomToCountry;
 
+    function CreateDotRenderer(featureLayer, indicator) {
+
+        defaultSymbol.color = GetDotLayerColor(indicator)
+        defaultSymbol.outline.color = GetDotLayerColor(indicator)
+        SummaryStatistics({
+            layer: featureLayer,
+            field: indicator,
+        }).then(function (statistics) {
+            const foreGroundRenderer = {
+                type: "simple",
+                symbol: defaultSymbol,
+                visualVariables: [
+                    {
+                        type: "size",
+                        field: indicator,
+                        minDataValue: statistics.min,
+                        maxDataValue: statistics.max,
+                        minSize: 10,
+                        maxSize: 35,
+                        legendOptions: {
+                            title: " ",
+                        }
+                    },
+                ],
+            };
+
+            featureLayer.renderer = foreGroundRenderer;
+            featureLayer.title = GetLabel(indicator);
+            featureLayer.popupTemplate = GetPopUpTemplate(indicator);
+        });
+    }
+
+    function ChangeDotLayerIndicator() {
+        StartLoading();
+        var indicator = this.value;
+        //Check if specific date selected
+        let date = document.getElementById("PeriodDateList").value;
+        if (date == "Total") {
+            map.removeAll();
+            CreateDotRenderer(foreGroundLayer, indicator);
+            AddLayersToMap(disputedBoundaries, backGroundLayer, foreGroundLayer)
+            setTimeout(EndLoading, 1000);
+        } else {
+            ChangeDate();
+        }
+    }
+    document.getElementById("2ndIndicatorsList").onchange = ChangeDotLayerIndicator;
+
+
     //Starting point
     StartLoading();
     FillCountriesMenu();
     FillDateMenu();
-    var startingVariable = "AttackRate";
-    generateRenderer(nationalLevel, startingVariable);
+    var defaultFirstIndicator = "AttackRate";
+    var defaultSecondIndicator = "MortalityRate";
+    CreateDotRenderer(foreGroundLayer, defaultSecondIndicator)
+    CreatePolygonRenderer(backGroundLayer, defaultFirstIndicator);
+    AddLayersToMap(disputedBoundaries, backGroundLayer, foreGroundLayer)
     setTimeout(EndLoading, 1000);
+
+    view.ui.add("filters", "top-left");
+    view.ui.add("filteringIcon", "top-right");
 
     view.ui.move("zoom", "top-right");
     let homeWidget = new Home({ view: view });
     view.ui.add(homeWidget, "top-right");
     view.ui.add("basemapGallery", "top-right");
-    view.ui.add("legendIcon", "bottom-left");
-    view.ui.add("filteringIcon", "top-left");
-    view.ui.add("filters", "top-left");
+    view.ui.add("legendIcon", "top-right");
+
 
     const basemapGallery = new BasemapGallery({
         view: view,
@@ -438,4 +542,5 @@ require([
         filters.style.display =
             filters.style.display === "block" ? "none" : "block";
     });
+
 });
