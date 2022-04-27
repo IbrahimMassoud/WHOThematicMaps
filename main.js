@@ -49,7 +49,7 @@ require([
     });
 
     const map = new Map({
-        basemap: "gray-vector",
+        basemap: "dark-gray-vector",
     });
 
     const view = new MapView({
@@ -83,7 +83,6 @@ require([
         }
     }
     function generateRenderer(featureLayer, variable) {
-        console.log(featureLayer)
         featureLayer.title = GetLabel(variable) //"0-Map legend";
         var colorRampName = GetColorRampName(variable);
         defaultScheme.colorsForClassBreaks =
@@ -134,7 +133,7 @@ require([
     }
     function EndLoading() {
         document.getElementById("loadingBox").style.display = "none";
-        document.getElementById("filteringIcon").style.display = "block";
+        document.getElementById("filteringIcon").style.display = "flex";
         document.getElementById("legendIcon").style.display = "block";
         document.getElementById("basemapGallery").style.display = "block";
         document.getElementById("filters").style.display = "block";
@@ -404,13 +403,17 @@ require([
     generateRenderer(nationalLevel, startingVariable);
     setTimeout(EndLoading, 1000);
 
+    view.ui.add("filters", "top-left");
+    view.ui.add("filteringIcon", "top-right");
+
     view.ui.move("zoom", "top-right");
     let homeWidget = new Home({ view: view });
     view.ui.add(homeWidget, "top-right");
     view.ui.add("basemapGallery", "top-right");
-    view.ui.add("legendIcon", "bottom-left");
-    view.ui.add("filteringIcon", "top-left");
-    view.ui.add("filters", "top-left");
+    view.ui.add("legendIcon", "top-right");
+    // view.ui.add("legendIcon", "bottom-left");
+
+
 
     const basemapGallery = new BasemapGallery({
         view: view,
