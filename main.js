@@ -296,45 +296,50 @@ require([
             nationalLevelView.queryFeatures(_query).then(function (filterdResult) {
                 filterdResult.features.forEach((f) => dataHolder.push(f));
 
-                var lyr = new FeatureLayer({
+                let fields = [{
+                    name: "ObjectID_1",
+                    alias: "ObjectID",
+                    type: "oid",
+                },
+                {
+                    name: "AttackRate",
+                    alias: "AttackRate",
+                    type: "double",
+                },
+                {
+                    name: "CFR",
+                    alias: "CFR",
+                    type: "double",
+                },
+                {
+                    name: "RecoveryRate",
+                    alias: "RecoveryRate",
+                    type: "double",
+                },
+                {
+                    name: "SampleTested",
+                    alias: "SampleTested",
+                    type: "double",
+                },
+                {
+                    name: "Population",
+                    alias: "Population",
+                    type: "integer",
+                },
+                {
+                    name: "Name",
+                    alias: "Name",
+                    type: "string",
+                }]
+                var backGroundNewlyr = new FeatureLayer({
                     source: geojson.features,
-                    fields: [
-                        {
-                            name: "ObjectID_1",
-                            alias: "ObjectID",
-                            type: "oid",
-                        },
-                        {
-                            name: "AttackRate",
-                            alias: "AttackRate",
-                            type: "double",
-                        },
-                        {
-                            name: "CFR",
-                            alias: "CFR",
-                            type: "double",
-                        },
-                        {
-                            name: "RecoveryRate",
-                            alias: "RecoveryRate",
-                            type: "double",
-                        },
-                        {
-                            name: "SampleTested",
-                            alias: "SampleTested",
-                            type: "double",
-                        },
-                        {
-                            name: "Population",
-                            alias: "Population",
-                            type: "integer",
-                        },
-                        {
-                            name: "Name",
-                            alias: "Name",
-                            type: "string",
-                        },
-                    ],
+                    fields: fields,
+                    objectIdField: "ObjectID_1",
+                    geometryType: "polygon",
+                });
+                var foreGroundNewlyr = new FeatureLayer({
+                    source: geojson.features,
+                    fields: fields,
                     objectIdField: "ObjectID_1",
                     geometryType: "polygon",
                 });
@@ -367,37 +372,59 @@ require([
                         );
                     });
 
-                    const promise = lyr.applyEdits({
+                    let RenderingPromise = new Promise(function (myResolve, myReject) {
+
+
+
+                    });
+                    const BKPromise = backGroundNewlyr.applyEdits({
                         addFeatures: featuresToBeAdded,
                     });
-                    promise.then(() => {
-                        map.removeAll();
-                        CreatePolygonRenderer(lyr, firstIndicator);
-                        CreateDotRenderer(foreGroundLayer, secondIndicator)
-                        AddLayersToMap(disputedBoundaries, lyr, foreGroundLayer)
-                        setTimeout(EndLoading, 1000);
-
-                        var newFeature = new FeatureLayer({
-                            source: lyr,
-                            objectIdField: "ObjectID_1",
-                            geometryType: "polygon"
-                        })
-
-                        return newFeature
-                        // newFeature.queryFeatures().then(function(res){
-                        //   res.features.forEach(f=> console.log(f))
-                        // })
-
-                        // console.log(newFeature)
-                        // // CreateDotRenderer(newFeature,secondIndicator)
-                        // AddLayersToMap(disputedBoundaries,lyr,newFeature) 
-                        // setTimeout(EndLoading, 1000);
-                    }).then((returned) => {
-
-                        // CreateDotRenderer(returned,secondIndicator)
-                        // AddLayersToMap(disputedBoundaries,lyr,returned) 
-                        // setTimeout(EndLoading, 1000);
+                    map.removeAll();
+                    BKPromise.then(() => {
+                        CreatePolygonRenderer(backGroundNewlyr, firstIndicator);
+                        AddLayersToMap(disputedBoundaries, backGroundNewlyr)
                     })
+
+                    const FRPromise = foreGroundNewlyr.applyEdits({
+                        addFeatures: featuresToBeAdded,
+                    });
+                    FRPromise.then(() => {
+                        CreateDotRenderer(foreGroundNewlyr, secondIndicator);
+                        AddLayersToMap(foreGroundNewlyr)
+                        setTimeout(EndLoading, 1000);
+                    })
+
+
+
+                    // BKPromise.then(() => {
+                    //   map.removeAll();
+                    //   CreatePolygonRenderer(backGroundNewlyr, firstIndicator);
+                    //   CreateDotRenderer(foreGroundLayer,secondIndicator)
+                    //   AddLayersToMap(disputedBoundaries,backGroundNewlyr,foreGroundLayer) 
+                    //   setTimeout(EndLoading, 1000);
+
+                    //   var newFeature = new FeatureLayer ({
+                    //     source:backGroundNewlyr,
+                    //     objectIdField: "ObjectID_1", 
+                    //     geometryType: "polygon"
+                    //   })
+
+                    //   return newFeature
+                    //   // newFeature.queryFeatures().then(function(res){
+                    //   //   res.features.forEach(f=> console.log(f))
+                    //   // })
+
+                    //   // console.log(newFeature)
+                    //   // // CreateDotRenderer(newFeature,secondIndicator)
+                    //   // AddLayersToMap(disputedBoundaries,backGroundNewlyr,newFeature) 
+                    //   // setTimeout(EndLoading, 1000);
+                    // }).then((returned) => {
+
+                    // // CreateDotRenderer(returned,secondIndicator)
+                    // // AddLayersToMap(disputedBoundaries,backGroundNewlyr,returned) 
+                    // // setTimeout(EndLoading, 1000);
+                    // }) 
                 });
             });
         }
