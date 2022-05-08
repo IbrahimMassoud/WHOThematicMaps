@@ -252,7 +252,7 @@ require([
             AddLayersToMap(disputedBoundaries, backGroundLayer, foreGroundLayer)
             setTimeout(EndLoading, 1000);
         } else {
-            ChangeDate();
+            FilterRecordsByDate();
         }
     }
     document.getElementById("1stIndicatorsList").onchange = ChangePolygonLayerIndicator;
@@ -266,9 +266,10 @@ require([
     }
     document.getElementById("PeriodTypeList").onchange = ChangeDateType;
 
-    function ChangeDate() {
+    function FilterRecordsByDate() {
         StartLoading();
-        var periodDataValue = document.getElementById("PeriodDateList").value;
+        var periodData = document.getElementById("PeriodDateList").value;
+        var periodTypeId = document.getElementById("PeriodTypeList").value;
         var firstIndicator = document.getElementById("1stIndicatorsList").value;
         var secondIndicator = document.getElementById("2ndIndicatorsList").value;
 
@@ -279,11 +280,11 @@ require([
             AddLayersToMap(disputedBoundaries, backGroundLayer, foreGroundLayer)
             setTimeout(EndLoading, 1000);
         } else {
-            dataHolder = [];
+            let dataHolder = [];
             let featuresToBeAdded = [];
 
-            var _query = {
-                where: "PeriodData = '" + periodDataValue + "'",
+            let _query = {
+                where: "PeriodData = '" + periodData + "'" + " AND  PeriodTypeId = '" + periodTypeId + "'",
                 returnGeometry: false,
                 outFields: ["*"],
             };
@@ -292,57 +293,61 @@ require([
                 type: "FeatureCollection",
                 features: [],
             };
+            let fields = [{
+                name: "ObjectID_1",
+                alias: "ObjectID",
+                type: "oid",
+            },
+            {
+                name: "AttackRate",
+                alias: "AttackRate",
+                type: "double",
+            },
+            {
+                name: "CFR",
+                alias: "CFR",
+                type: "double",
+            },
+            {
+                name: "RecoveryRate",
+                alias: "RecoveryRate",
+                type: "double",
+            },
+            {
+                name: "SampleTested",
+                alias: "SampleTested",
+                type: "double",
+            },
+            {
+                name: "Population",
+                alias: "Population",
+                type: "integer",
+            },
+            {
+                name: "Name",
+                alias: "Name",
+                type: "string",
+            },
+            {
+                name: "MortalityRate",
+                alias: "MortalityRate",
+                type: "double",
+            }]
+            let backGroundNewlyr = new FeatureLayer({
+                source: geojson.features,
+                fields: fields,
+                objectIdField: "ObjectID_1",
+                geometryType: "polygon",
+            });
+            let foreGroundNewlyr = new FeatureLayer({
+                source: geojson.features,
+                fields: fields,
+                objectIdField: "ObjectID_1",
+                geometryType: "polygon",
+            });
 
             nationalLevelView.queryFeatures(_query).then(function (filterdResult) {
                 filterdResult.features.forEach((f) => dataHolder.push(f));
-
-                let fields = [{
-                    name: "ObjectID_1",
-                    alias: "ObjectID",
-                    type: "oid",
-                },
-                {
-                    name: "AttackRate",
-                    alias: "AttackRate",
-                    type: "double",
-                },
-                {
-                    name: "CFR",
-                    alias: "CFR",
-                    type: "double",
-                },
-                {
-                    name: "RecoveryRate",
-                    alias: "RecoveryRate",
-                    type: "double",
-                },
-                {
-                    name: "SampleTested",
-                    alias: "SampleTested",
-                    type: "double",
-                },
-                {
-                    name: "Population",
-                    alias: "Population",
-                    type: "integer",
-                },
-                {
-                    name: "Name",
-                    alias: "Name",
-                    type: "string",
-                }]
-                var backGroundNewlyr = new FeatureLayer({
-                    source: geojson.features,
-                    fields: fields,
-                    objectIdField: "ObjectID_1",
-                    geometryType: "polygon",
-                });
-                var foreGroundNewlyr = new FeatureLayer({
-                    source: geojson.features,
-                    fields: fields,
-                    objectIdField: "ObjectID_1",
-                    geometryType: "polygon",
-                });
 
                 backGroundLayer.queryFeatures().then(function (results) {
                     dataHolder.forEach((record) => {
@@ -357,6 +362,8 @@ require([
                             }
                         }
                         // feature = results.features.filter(res =>  res.attributes.Code == record.attributes.NationalLevelCode )
+                        console.log(record.attributes.PeriodData)
+                        console.log(record.attributes.NationalLevelName)
                         featuresToBeAdded.push(
                             new Graphic({
                                 geometry: feature.geometry,
@@ -367,23 +374,25 @@ require([
                                     CFR: record.attributes.CFR,
                                     RecoveryRate: record.attributes.RecoveryRate,
                                     SampleTested: record.attributes.SampleTested,
+                                    MortalityRate: record.attributes.MortalityRate,
                                 },
                             })
                         );
                     });
 
-                    let RenderingPromise = new Promise(function (myResolve, myReject) {
+                    // let RenderingPromise = new Promise(function(myResolve, myReject) {
+                    // });
+                    // RenderingPromise.then(()=>{console.log("In")})
 
-
-
-                    });
+                    map.removeAll();
                     const BKPromise = backGroundNewlyr.applyEdits({
                         addFeatures: featuresToBeAdded,
                     });
-                    map.removeAll();
                     BKPromise.then(() => {
                         CreatePolygonRenderer(backGroundNewlyr, firstIndicator);
                         AddLayersToMap(disputedBoundaries, backGroundNewlyr)
+                        backGroundNewlyr.queryFeatures().then((res) => { console.log(res.features) })
+
                     })
 
                     const FRPromise = foreGroundNewlyr.applyEdits({
@@ -392,6 +401,8 @@ require([
                     FRPromise.then(() => {
                         CreateDotRenderer(foreGroundNewlyr, secondIndicator);
                         AddLayersToMap(foreGroundNewlyr)
+                        foreGroundNewlyr.queryFeatures().then((res) => { console.log(res.features) })
+
                         setTimeout(EndLoading, 1000);
                     })
 
@@ -429,7 +440,7 @@ require([
             });
         }
     }
-    document.getElementById("PeriodDateList").onchange = ChangeDate;
+    document.getElementById("PeriodDateList").onchange = FilterRecordsByDate;
 
     function ChangeDateType() {
         var periodDataSelector = document.getElementById("PeriodDateList");
@@ -516,7 +527,7 @@ require([
             AddLayersToMap(disputedBoundaries, backGroundLayer, foreGroundLayer)
             setTimeout(EndLoading, 1000);
         } else {
-            ChangeDate();
+            FilterRecordsByDate();
         }
     }
     document.getElementById("2ndIndicatorsList").onchange = ChangeDotLayerIndicator;
