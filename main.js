@@ -273,7 +273,7 @@ require([
         var firstIndicator = document.getElementById("1stIndicatorsList").value;
         var secondIndicator = document.getElementById("2ndIndicatorsList").value;
 
-        if (periodDataValue == "Total") {
+        if (periodData == "Total") {
             map.removeAll();
             CreatePolygonRenderer(backGroundLayer, firstIndicator);
             CreateDotRenderer(foreGroundLayer, secondIndicator)
@@ -333,18 +333,7 @@ require([
                 alias: "MortalityRate",
                 type: "double",
             }]
-            let backGroundNewlyr = new FeatureLayer({
-                source: geojson.features,
-                fields: fields,
-                objectIdField: "ObjectID_1",
-                geometryType: "polygon",
-            });
-            let foreGroundNewlyr = new FeatureLayer({
-                source: geojson.features,
-                fields: fields,
-                objectIdField: "ObjectID_1",
-                geometryType: "polygon",
-            });
+
 
             nationalLevelView.queryFeatures(_query).then(function (filterdResult) {
                 filterdResult.features.forEach((f) => dataHolder.push(f));
@@ -362,8 +351,8 @@ require([
                             }
                         }
                         // feature = results.features.filter(res =>  res.attributes.Code == record.attributes.NationalLevelCode )
-                        console.log(record.attributes.PeriodData)
-                        console.log(record.attributes.NationalLevelName)
+                        // console.log(record.attributes.PeriodData)
+                        // console.log(record.attributes.NationalLevelName)
                         featuresToBeAdded.push(
                             new Graphic({
                                 geometry: feature.geometry,
@@ -384,6 +373,19 @@ require([
                     // });
                     // RenderingPromise.then(()=>{console.log("In")})
 
+                    let backGroundNewlyr = new FeatureLayer({
+                        source: geojson.features,
+                        fields: fields,
+                        objectIdField: "ObjectID_1",
+                        geometryType: "polygon",
+                    });
+                    let foreGroundNewlyr = new FeatureLayer({
+                        source: geojson.features,
+                        fields: fields,
+                        objectIdField: "ObjectID_1",
+                        geometryType: "polygon",
+                    });
+
                     map.removeAll();
                     const BKPromise = backGroundNewlyr.applyEdits({
                         addFeatures: featuresToBeAdded,
@@ -391,7 +393,7 @@ require([
                     BKPromise.then(() => {
                         CreatePolygonRenderer(backGroundNewlyr, firstIndicator);
                         AddLayersToMap(disputedBoundaries, backGroundNewlyr)
-                        backGroundNewlyr.queryFeatures().then((res) => { console.log(res.features) })
+                        // backGroundNewlyr.queryFeatures().then((res)=>{ console.log(res.features)})
 
                     })
 
@@ -401,8 +403,7 @@ require([
                     FRPromise.then(() => {
                         CreateDotRenderer(foreGroundNewlyr, secondIndicator);
                         AddLayersToMap(foreGroundNewlyr)
-                        foreGroundNewlyr.queryFeatures().then((res) => { console.log(res.features) })
-
+                        // foreGroundNewlyr.queryFeatures().then((res)=>{ console.log(res.features)})
                         setTimeout(EndLoading, 1000);
                     })
 
