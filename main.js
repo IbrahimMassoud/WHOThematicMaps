@@ -240,7 +240,6 @@ require([
             });
         });
     }
-
     function ChangePolygonLayerIndicator() {
         StartLoading();
         var firstIndicator = this.value;
@@ -351,8 +350,6 @@ require([
                             }
                         }
                         // feature = results.features.filter(res =>  res.attributes.Code == record.attributes.NationalLevelCode )
-                        // console.log(record.attributes.PeriodData)
-                        // console.log(record.attributes.NationalLevelName)
                         featuresToBeAdded.push(
                             new Graphic({
                                 geometry: feature.geometry,
@@ -369,10 +366,6 @@ require([
                         );
                     });
 
-                    // let RenderingPromise = new Promise(function(myResolve, myReject) {
-                    // });
-                    // RenderingPromise.then(()=>{console.log("In")})
-
                     let backGroundNewlyr = new FeatureLayer({
                         source: geojson.features,
                         fields: fields,
@@ -386,15 +379,17 @@ require([
                         geometryType: "polygon",
                     });
 
-                    map.removeAll();
+                    // map.layers._items.filter(layer => layer.title != "Disputed Boundaries")
+                    // .forEach(lyr => map.remove(lyr));
+                    map.removeAll()
+                    map.add(disputedBoundaries, 0)
+
                     const BKPromise = backGroundNewlyr.applyEdits({
                         addFeatures: featuresToBeAdded,
                     });
                     BKPromise.then(() => {
                         CreatePolygonRenderer(backGroundNewlyr, firstIndicator);
-                        AddLayersToMap(disputedBoundaries, backGroundNewlyr)
-                        // backGroundNewlyr.queryFeatures().then((res)=>{ console.log(res.features)})
-
+                        map.add(backGroundNewlyr, 1)
                     })
 
                     const FRPromise = foreGroundNewlyr.applyEdits({
@@ -402,41 +397,11 @@ require([
                     });
                     FRPromise.then(() => {
                         CreateDotRenderer(foreGroundNewlyr, secondIndicator);
-                        AddLayersToMap(foreGroundNewlyr)
+                        map.add(foreGroundNewlyr, 2)
                         // foreGroundNewlyr.queryFeatures().then((res)=>{ console.log(res.features)})
                         setTimeout(EndLoading, 1000);
                     })
 
-
-
-                    // BKPromise.then(() => {
-                    //   map.removeAll();
-                    //   CreatePolygonRenderer(backGroundNewlyr, firstIndicator);
-                    //   CreateDotRenderer(foreGroundLayer,secondIndicator)
-                    //   AddLayersToMap(disputedBoundaries,backGroundNewlyr,foreGroundLayer) 
-                    //   setTimeout(EndLoading, 1000);
-
-                    //   var newFeature = new FeatureLayer ({
-                    //     source:backGroundNewlyr,
-                    //     objectIdField: "ObjectID_1", 
-                    //     geometryType: "polygon"
-                    //   })
-
-                    //   return newFeature
-                    //   // newFeature.queryFeatures().then(function(res){
-                    //   //   res.features.forEach(f=> console.log(f))
-                    //   // })
-
-                    //   // console.log(newFeature)
-                    //   // // CreateDotRenderer(newFeature,secondIndicator)
-                    //   // AddLayersToMap(disputedBoundaries,backGroundNewlyr,newFeature) 
-                    //   // setTimeout(EndLoading, 1000);
-                    // }).then((returned) => {
-
-                    // // CreateDotRenderer(returned,secondIndicator)
-                    // // AddLayersToMap(disputedBoundaries,backGroundNewlyr,returned) 
-                    // // setTimeout(EndLoading, 1000);
-                    // }) 
                 });
             });
         }
@@ -516,7 +481,6 @@ require([
             featureLayer.popupTemplate = GetPopUpTemplate(indicator);
         });
     }
-
     function ChangeDotLayerIndicator() {
         StartLoading();
         var indicator = this.value;
