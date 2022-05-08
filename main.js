@@ -83,7 +83,7 @@ require([
                 return "Esri Pumpkin Pie";
             case "CFR":
                 return "Red 8";
-            case "sampleTested":
+            case "SampleTested":
                 return "Purple 9";
             case "MortalityRate":
                 return "Esri Red 1";
@@ -97,7 +97,7 @@ require([
                 return [251, 182, 100, 0.75];
             case "CFR":
                 return [194, 61, 51, 0.75];
-            case "sampleTested":
+            case "SampleTested":
                 return [133, 49, 193, 0.75];
             case "MortalityRate":
                 return [216, 48, 32, 0.75];
@@ -173,7 +173,7 @@ require([
                             label: label,
                             format: {
                                 digitSeparator: true,
-                                places: 0,
+                                // places: 0,
                             },
                         },
                         {
@@ -196,7 +196,7 @@ require([
                 return "Confirmed cases per 100,000 population";
             case "CFR":
                 return "Case fatality ratio %";
-            case "sampleTested":
+            case "SampleTested":
                 return "Tests per 1000,000 population";
             case "RecoveryRate":
                 return "Recovery rate %";
@@ -398,7 +398,7 @@ require([
                     FRPromise.then(() => {
                         CreateDotRenderer(foreGroundNewlyr, secondIndicator);
                         map.add(foreGroundNewlyr, 2)
-                        // foreGroundNewlyr.queryFeatures().then((res)=>{ console.log(res.features)})
+                        foreGroundNewlyr.queryFeatures().then((res) => { console.log(res.features) })
                         setTimeout(EndLoading, 1000);
                     })
 
