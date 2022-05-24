@@ -30,11 +30,25 @@ require([
     // esriConfig.apiKey =
     //   "AAPKe44b10789165473bbb2ed24e27e5a9f9tAJ4hB35ju4KTciHnmADukI2pL1KgoM-PNcxhZJswrhJQOM2ph5rRAXkm-D_-abA";
     const nationalUrl =
+        //Prosylab
         "https://services3.arcgis.com/1FS0hEOLnjHnov75/arcgis/rest/services/WHO_EMRO_GD_20220417_ThematicMap/FeatureServer/0";
+    //WHO, Not public till now
+    //"https://services.arcgis.com/5T5nSi527N4F7luB/arcgis/rest/services/WHO_EMRO_GD_gdb/FeatureServer/0"; ==> service
+    //"https://who.maps.arcgis.com/home/item.html?id=4282c9322e8144c08f1812ece8cc7cdc&sublayer=0" ==> Url at AGOL
+
     const nationalViewUrl =
+        //Prosylab
         "https://services3.arcgis.com/1FS0hEOLnjHnov75/arcgis/rest/services/WHO_EMRO_GD_20220417_ThematicMap/FeatureServer/4";
+    //WHO, Not public till now
+    //"https://services.arcgis.com/5T5nSi527N4F7luB/arcgis/rest/services/WHO_EMRO_GD_gdb/FeatureServer/4"; ==> service
+    //"https://who.maps.arcgis.com/home/item.html?id=4282c9322e8144c08f1812ece8cc7cdc&sublayer=4" ==> Url at AGOL
+
     const disputedBoundariesUrl =
+        //Prosylab
         "https://services3.arcgis.com/1FS0hEOLnjHnov75/arcgis/rest/services/EMRO_Disputed_boundaries_FGDB/FeatureServer"
+    //WHO, Not public till now
+    //"https://services.arcgis.com/5T5nSi527N4F7luB/arcgis/rest/services/EMRO_Disputed_boundaries/FeatureServer"; ==> service
+    //"https://who.maps.arcgis.com/home/item.html?id=1fccaeb33e29418c987590b8e62943cb#overview" ==> Url at AGOL
 
     const classificationMethod = "natural-breaks";
     const numClasses = 5;
@@ -91,7 +105,7 @@ require([
                 return "Esri Green 2";
         }
     }
-    function GetDotLayerColor(secondIndicator) {
+    function GetColor(secondIndicator) {
         switch (secondIndicator) {
             case "AttackRate":
                 return [251, 182, 100, 0.75];
@@ -158,6 +172,7 @@ require([
         document.getElementById("legendIcon").style.display = "block";
         document.getElementById("basemapGallery").style.display = "block";
         document.getElementById("filters").style.display = "block";
+        document.getElementById("Indicators").style.display = "block";
         document.getElementById("viewDiv").style.display = "flex";
     }
     function GetPopUpTemplate(indicator) {
@@ -201,7 +216,7 @@ require([
             case "RecoveryRate":
                 return "Recovery rate %";
             case "MortalityRate":
-                return "Death cases per 100,000 population";
+                return "Deaths per 100,000 population";
         }
     }
     function FillCountriesMenu() {
@@ -240,6 +255,16 @@ require([
             });
         });
     }
+    function SetIconsColor() {
+        var firstIndicator = document.getElementById("1stIndicatorsList").value;
+        var secondIndicator = document.getElementById("2ndIndicatorsList").value;
+
+        var polIcon = document.getElementById("PolIcon");
+        var pointIcon = document.getElementById("PointIcon");
+
+        polIcon.style.color = `rgba(${GetColor(firstIndicator).join(',')})`
+        pointIcon.style.color = `rgba(${GetColor(secondIndicator).join(',')})`
+    }
     function ChangePolygonLayerIndicator() {
         StartLoading();
         var firstIndicator = this.value;
@@ -248,8 +273,9 @@ require([
         if (date == "Total") {
             map.removeAll();
             CreatePolygonRenderer(backGroundLayer, firstIndicator);
-            AddLayersToMap(disputedBoundaries, backGroundLayer, foreGroundLayer)
-            setTimeout(EndLoading, 1000);
+            AddLayersToMap(backGroundLayer, foreGroundLayer, disputedBoundaries)
+            SetIconsColor()
+            setTimeout(EndLoading, 2000);
         } else {
             FilterRecordsByDate();
         }
@@ -271,12 +297,13 @@ require([
         var periodTypeId = document.getElementById("PeriodTypeList").value;
         var firstIndicator = document.getElementById("1stIndicatorsList").value;
         var secondIndicator = document.getElementById("2ndIndicatorsList").value;
+        SetIconsColor()
 
         if (periodData == "Total") {
             map.removeAll();
             CreatePolygonRenderer(backGroundLayer, firstIndicator);
             CreateDotRenderer(foreGroundLayer, secondIndicator)
-            AddLayersToMap(disputedBoundaries, backGroundLayer, foreGroundLayer)
+            AddLayersToMap(backGroundLayer, foreGroundLayer, disputedBoundaries)
             setTimeout(EndLoading, 1000);
         } else {
             let dataHolder = [];
@@ -382,14 +409,14 @@ require([
                     // map.layers._items.filter(layer => layer.title != "Disputed Boundaries")
                     // .forEach(lyr => map.remove(lyr));
                     map.removeAll()
-                    map.add(disputedBoundaries, 0)
+                    map.add(disputedBoundaries, 2)
 
                     const BKPromise = backGroundNewlyr.applyEdits({
                         addFeatures: featuresToBeAdded,
                     });
                     BKPromise.then(() => {
                         CreatePolygonRenderer(backGroundNewlyr, firstIndicator);
-                        map.add(backGroundNewlyr, 1)
+                        map.add(backGroundNewlyr, 0)
                     })
 
                     const FRPromise = foreGroundNewlyr.applyEdits({
@@ -397,11 +424,10 @@ require([
                     });
                     FRPromise.then(() => {
                         CreateDotRenderer(foreGroundNewlyr, secondIndicator);
-                        map.add(foreGroundNewlyr, 2)
-                        foreGroundNewlyr.queryFeatures().then((res) => { console.log(res.features) })
+                        map.add(foreGroundNewlyr, 1)
+                        // foreGroundNewlyr.queryFeatures().then((res)=>{ console.log(res.features)})
                         setTimeout(EndLoading, 1000);
                     })
-
                 });
             });
         }
@@ -419,7 +445,7 @@ require([
             StartLoading();
             map.removeAll();
             CreatePolygonRenderer(backGroundLayer, firstIndicator);
-            AddLayersToMap(disputedBoundaries, backGroundLayer, foreGroundLayer)
+            AddLayersToMap(backGroundLayer, foreGroundLayer, disputedBoundaries)
 
             setTimeout(EndLoading, 1000);
         }
@@ -436,7 +462,7 @@ require([
             };
             backGroundLayer.queryFeatures(query).then(function (results) {
                 let caller = results.features[0];
-                view.goTo(caller.geometry, { duration: 1000 });
+                view.goTo(caller.geometry, { duration: 1500 });
             });
         } else {
             view.goTo(
@@ -452,8 +478,8 @@ require([
 
     function CreateDotRenderer(featureLayer, indicator) {
 
-        defaultSymbol.color = GetDotLayerColor(indicator)
-        defaultSymbol.outline.color = GetDotLayerColor(indicator)
+        defaultSymbol.color = GetColor(indicator)
+        defaultSymbol.outline.color = GetColor(indicator)
         SummaryStatistics({
             layer: featureLayer,
             field: indicator,
@@ -479,6 +505,7 @@ require([
             featureLayer.renderer = foreGroundRenderer;
             featureLayer.title = GetLabel(indicator);
             featureLayer.popupTemplate = GetPopUpTemplate(indicator);
+            SetIconsColor()
         });
     }
     function ChangeDotLayerIndicator() {
@@ -489,8 +516,8 @@ require([
         if (date == "Total") {
             map.removeAll();
             CreateDotRenderer(foreGroundLayer, indicator);
-            AddLayersToMap(disputedBoundaries, backGroundLayer, foreGroundLayer)
-            setTimeout(EndLoading, 1000);
+            AddLayersToMap(backGroundLayer, foreGroundLayer, disputedBoundaries)
+            setTimeout(EndLoading, 2000);
         } else {
             FilterRecordsByDate();
         }
@@ -506,18 +533,9 @@ require([
     var defaultSecondIndicator = "MortalityRate";
     CreateDotRenderer(foreGroundLayer, defaultSecondIndicator)
     CreatePolygonRenderer(backGroundLayer, defaultFirstIndicator);
-    AddLayersToMap(disputedBoundaries, backGroundLayer, foreGroundLayer)
+    SetIconsColor()
+    AddLayersToMap(backGroundLayer, foreGroundLayer, disputedBoundaries)
     setTimeout(EndLoading, 1000);
-
-    view.ui.add("filters", "top-left");
-    view.ui.add("filteringIcon", "top-right");
-
-    view.ui.move("zoom", "top-right");
-    let homeWidget = new Home({ view: view });
-    view.ui.add(homeWidget, "top-right");
-    view.ui.add("basemapGallery", "top-right");
-    view.ui.add("legendIcon", "top-right");
-
 
     const basemapGallery = new BasemapGallery({
         view: view,
@@ -533,6 +551,19 @@ require([
 
     view.ui.add(basemapGallery, { position: "top-right" });
     basemapGallery.visible = false;
+
+    view.ui.add("filters", "top-left");
+    view.ui.add("Indicators", "top-left");
+    view.ui.add("filteringIcon", "top-right");
+
+    view.ui.move("zoom", "top-right");
+    let homeWidget = new Home({ view: view });
+    view.ui.add(homeWidget, "top-right");
+    view.ui.add("basemapGallery", "top-right");
+    view.ui.add("legendIcon", "top-right");
+
+
+
 
     document.getElementById("basemapGallery").addEventListener("click", () => {
         basemapGallery.visible = !basemapGallery.visible;
