@@ -5,13 +5,12 @@ require([
     "esri/widgets/Legend",
     "esri/layers/GeoJSONLayer",
     "esri/widgets/Home",
-    "esri/widgets/BasemapGallery",
-    "esri/config",
     "esri/smartMapping/renderers/color",
     "esri/smartMapping/symbology/color",
     "esri/smartMapping/symbology/support/colorRamps",
     "esri/layers/GraphicsLayer",
     "esri/smartMapping/statistics/summaryStatistics",
+    "esri/widgets/Expand",
 ], (
     Map,
     MapView,
@@ -19,16 +18,14 @@ require([
     Legend,
     GeoJSONLayer,
     Home,
-    BasemapGallery,
-    esriConfig,
     colorRendererCreator,
     colorSymbology,
     colorRamps,
     Graphic,
-    SummaryStatistics
+    SummaryStatistics,
+    Expand,
 ) => {
-    // esriConfig.apiKey =
-    //   "AAPKe44b10789165473bbb2ed24e27e5a9f9tAJ4hB35ju4KTciHnmADukI2pL1KgoM-PNcxhZJswrhJQOM2ph5rRAXkm-D_-abA";
+   
     const nationalUrl =
         //Prosylab
         "https://services3.arcgis.com/1FS0hEOLnjHnov75/arcgis/rest/services/WHO_EMRO_GD_20220417_ThematicMap/FeatureServer/0";
@@ -160,17 +157,13 @@ require([
         // });
     }
     function StartLoading() {
-        document.getElementById("basemapGallery").style.display = "none";
         document.getElementById("viewDiv").style.display = "none";
-        document.getElementById("legendIcon").style.display = "none";
-        document.getElementById("filteringIcon").style.display = "none";
+        // document.getElementById("filteringIcon").style.display = "none";
         document.getElementById("loadingBox").style.display = "flex";
     }
     function EndLoading() {
         document.getElementById("loadingBox").style.display = "none";
-        document.getElementById("filteringIcon").style.display = "flex";
-        document.getElementById("legendIcon").style.display = "block";
-        document.getElementById("basemapGallery").style.display = "block";
+        // document.getElementById("filteringIcon").style.display = "flex";
         document.getElementById("filters").style.display = "block";
         document.getElementById("Indicators").style.display = "block";
         document.getElementById("viewDiv").style.display = "flex";
@@ -524,7 +517,6 @@ require([
     }
     document.getElementById("2ndIndicatorsList").onchange = ChangeDotLayerIndicator;
 
-
     //Starting point
     StartLoading();
     FillCountriesMenu();
@@ -537,21 +529,18 @@ require([
     AddLayersToMap(backGroundLayer, foreGroundLayer, disputedBoundaries)
     setTimeout(EndLoading, 1000);
 
-    const basemapGallery = new BasemapGallery({
-        view: view,
-        container: document.createElement("div"),
-    });
     const legend = new Legend({
         view: view,
-        expanded: true,
-        expandIconClass: "esri-icon-legend",
-        expandTooltip: "Expand Legend",
     });
-    view.ui.add(legend, "bottom-left");
 
-    view.ui.add(basemapGallery, { position: "top-right" });
-    basemapGallery.visible = false;
-
+    legendExpand = new Expand({
+        expandIconClass: "esri-icon-legend \ue90c", 
+        expandTooltip: "Expand legend",
+        view: view,
+        content: legend,
+      });
+      view.ui.add(legendExpand, "bottom-left");
+   
     view.ui.add("filters", "top-left");
     view.ui.add("Indicators", "top-left");
     view.ui.add("filteringIcon", "top-right");
@@ -559,18 +548,7 @@ require([
     view.ui.move("zoom", "top-right");
     let homeWidget = new Home({ view: view });
     view.ui.add(homeWidget, "top-right");
-    view.ui.add("basemapGallery", "top-right");
-    view.ui.add("legendIcon", "top-right");
-
-
-
-
-    document.getElementById("basemapGallery").addEventListener("click", () => {
-        basemapGallery.visible = !basemapGallery.visible;
-    });
-    document.getElementById("legendIcon").addEventListener("click", () => {
-        legend.visible = !legend.visible;
-    });
+   
     document.getElementById("filteringIcon").addEventListener("click", () => {
         let filters = document.getElementById("filters");
         filters.style.display =
