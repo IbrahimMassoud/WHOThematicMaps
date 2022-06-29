@@ -308,10 +308,6 @@ require([
                 outFields: ["*"],
             };
 
-            const geojson = {
-                type: "FeatureCollection",
-                features: [],
-            };
             let fields = [{
                 name: "ObjectID_1",
                 alias: "ObjectID",
@@ -352,8 +348,7 @@ require([
                 alias: "MortalityRate",
                 type: "double",
             }]
-
-
+          
             nationalLevelView.queryFeatures(_query).then(function (filterdResult) {
                 filterdResult.features.forEach((f) => dataHolder.push(f));
 
@@ -386,41 +381,24 @@ require([
                         );
                     });
 
-                    let backGroundNewlyr = new FeatureLayer({
-                        source: geojson.features,
-                        fields: fields,
+                    var foreGroundNewlyr = new FeatureLayer({
+                        source: featuresToBeAdded,
                         objectIdField: "ObjectID_1",
-                        geometryType: "polygon",
-                    });
-                    let foreGroundNewlyr = new FeatureLayer({
-                        source: geojson.features,
-                        fields: fields,
+                        fields:  fields,
+                        
+                      });
+                      var backGroundNewlyr = new FeatureLayer({
+                        source: featuresToBeAdded,
                         objectIdField: "ObjectID_1",
-                        geometryType: "polygon",
-                    });
+                        fields:  fields,
+                        
+                      });
 
-                    // map.layers._items.filter(layer => layer.title != "Disputed Boundaries")
-                    // .forEach(lyr => map.remove(lyr));
                     map.removeAll()
-                    map.add(disputedBoundaries, 2)
-
-                    const BKPromise = backGroundNewlyr.applyEdits({
-                        addFeatures: featuresToBeAdded,
-                    });
-                    BKPromise.then(() => {
-                        CreatePolygonRenderer(backGroundNewlyr, firstIndicator);
-                        map.add(backGroundNewlyr, 0)
-                    })
-
-                    const FRPromise = foreGroundNewlyr.applyEdits({
-                        addFeatures: featuresToBeAdded,
-                    });
-                    FRPromise.then(() => {
-                        CreateDotRenderer(foreGroundNewlyr, secondIndicator);
-                        map.add(foreGroundNewlyr, 1)
-                        // foreGroundNewlyr.queryFeatures().then((res)=>{ console.log(res.features)})
-                        setTimeout(EndLoading, 1000);
-                    })
+                    CreatePolygonRenderer(backGroundNewlyr, firstIndicator);
+                    CreateDotRenderer(foreGroundNewlyr, secondIndicator);
+                    AddLayersToMap(backGroundNewlyr,foreGroundLayer,disputedBoundaries)
+                    setTimeout(EndLoading, 2000);
                 });
             });
         }
