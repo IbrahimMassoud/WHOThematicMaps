@@ -467,7 +467,9 @@ require([
 
     function CreateDotRenderer(featureLayer, indicator) {
 
+        
         defaultSymbol.color = GetColor(indicator)
+        defaultSymbol.outline.color = GetColor(indicator)
         SummaryStatistics({
             layer: featureLayer,
             field: indicator,
