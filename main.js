@@ -380,7 +380,8 @@ require([
                                     MortalityRate: record.attributes.MortalityRate,
                                 },
                             })
-                        );
+                        ); 
+                    });
 
                     var foreGroundNewlyr = new FeatureLayer({
                         source: featuresToBeAdded,
