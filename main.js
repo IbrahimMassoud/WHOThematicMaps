@@ -74,6 +74,12 @@ require([
         center: [22, 24],
         zoom: 3,
     });
+    view.constraints = {
+       
+        minScale: 75000000,
+        maxScale: 3000000, 
+        rotationEnabled: false 
+      };
 
     const defaultScheme = colorSymbology.getSchemeByName({
         basemap: map.basemap,
