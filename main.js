@@ -8,7 +8,7 @@ require([
     "esri/smartMapping/renderers/color",
     "esri/smartMapping/symbology/color",
     "esri/smartMapping/symbology/support/colorRamps",
-    "esri/layers/GraphicsLayer",
+    "esri/Graphic",
     "esri/smartMapping/statistics/summaryStatistics",
     "esri/widgets/Expand",
 ], (
@@ -122,6 +122,7 @@ require([
     function CreatePolygonRenderer(featureLayer, firstIndicator) {
         featureLayer.title = GetLabel(firstIndicator) //"0-Map legend";
         var colorRampName = GetColorRampName(firstIndicator);
+       
         defaultScheme.colorsForClassBreaks =
             colorRamps.byName(colorRampName).colorsForClassBreaks;
         const colorScheme = colorSymbology.flipColors(defaultScheme);
@@ -290,6 +291,7 @@ require([
         var periodTypeId = document.getElementById("PeriodTypeList").value;
         var firstIndicator = document.getElementById("1stIndicatorsList").value;
         var secondIndicator = document.getElementById("2ndIndicatorsList").value;
+       
         SetIconsColor()
 
         if (periodData == "Total") {
@@ -301,6 +303,8 @@ require([
         } else {
             let dataHolder = [];
             let featuresToBeAdded = [];
+            let _featuresToBeAdded = [];
+
 
             let _query = {
                 where: "PeriodData = '" + periodData + "'" + " AND  PeriodTypeId = '" + periodTypeId + "'",
@@ -379,6 +383,20 @@ require([
                                 },
                             })
                         );
+                        _featuresToBeAdded.push(
+                            new Graphic({
+                                geometry: feature.geometry,
+                                attributes: {
+                                    Name: feature.attributes.Name,
+                                    Population: feature.attributes.Population,
+                                    AttackRate: record.attributes.AttackRate,
+                                    CFR: record.attributes.CFR,
+                                    RecoveryRate: record.attributes.RecoveryRate,
+                                    SampleTested: record.attributes.SampleTested,
+                                    MortalityRate: record.attributes.MortalityRate,
+                                },
+                            })
+                        );
                     });
 
                     var foreGroundNewlyr = new FeatureLayer({
@@ -388,7 +406,7 @@ require([
                         
                       });
                       var backGroundNewlyr = new FeatureLayer({
-                        source: featuresToBeAdded,
+                        source: _featuresToBeAdded,
                         objectIdField: "ObjectID_1",
                         fields:  fields,
                         
@@ -397,7 +415,7 @@ require([
                     map.removeAll()
                     CreatePolygonRenderer(backGroundNewlyr, firstIndicator);
                     CreateDotRenderer(foreGroundNewlyr, secondIndicator);
-                    AddLayersToMap(backGroundNewlyr,foreGroundLayer,disputedBoundaries)
+                    AddLayersToMap(backGroundNewlyr,foreGroundNewlyr,disputedBoundaries)
                     setTimeout(EndLoading, 2000);
                 });
             });
@@ -450,7 +468,6 @@ require([
     function CreateDotRenderer(featureLayer, indicator) {
 
         defaultSymbol.color = GetColor(indicator)
-        defaultSymbol.outline.color = GetColor(indicator)
         SummaryStatistics({
             layer: featureLayer,
             field: indicator,
