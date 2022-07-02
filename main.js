@@ -303,9 +303,7 @@ require([
         } else {
             let dataHolder = [];
             let featuresToBeAdded = [];
-            let _featuresToBeAdded = [];
-
-
+           
             let _query = {
                 where: "PeriodData = '" + periodData + "'" + " AND  PeriodTypeId = '" + periodTypeId + "'",
                 returnGeometry: false,
@@ -383,21 +381,6 @@ require([
                                 },
                             })
                         );
-                        _featuresToBeAdded.push(
-                            new Graphic({
-                                geometry: feature.geometry,
-                                attributes: {
-                                    Name: feature.attributes.Name,
-                                    Population: feature.attributes.Population,
-                                    AttackRate: record.attributes.AttackRate,
-                                    CFR: record.attributes.CFR,
-                                    RecoveryRate: record.attributes.RecoveryRate,
-                                    SampleTested: record.attributes.SampleTested,
-                                    MortalityRate: record.attributes.MortalityRate,
-                                },
-                            })
-                        );
-                    });
 
                     var foreGroundNewlyr = new FeatureLayer({
                         source: featuresToBeAdded,
@@ -406,7 +389,7 @@ require([
                         
                       });
                       var backGroundNewlyr = new FeatureLayer({
-                        source: _featuresToBeAdded,
+                        source: featuresToBeAdded,
                         objectIdField: "ObjectID_1",
                         fields:  fields,
                         
